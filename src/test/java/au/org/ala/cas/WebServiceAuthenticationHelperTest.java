@@ -6,8 +6,9 @@ import junit.framework.TestCase;
 public class WebServiceAuthenticationHelperTest extends TestCase {
 
 	public void testWebServiceInvocation() {
-		WebServiceAuthenticationHelper wsw = new WebServiceAuthenticationHelper("https://alatstdb1-cbr.vm.csiro.au", "hit.user@ala.org.au", "hit-password");
-		String response = wsw.invoke("http://collections.ala.org.au/co/co13.json");
-		System.out.println(response);
+        // test removed as server has been deprecated
+//		WebServiceAuthenticationHelper wsw = new WebServiceAuthenticationHelper("https://alatstdb1-cbr.vm.csiro.au", "hit.user@ala.org.au", "hit-password");
+//		String response = wsw.invoke("http://collections.ala.org.au/co/co13.json");
+//		System.out.println(response);
 	}
 }
