@@ -33,6 +33,12 @@ public class AuthenticationCookieUtils {
     }
     
     public static Cookie getCookie(HttpServletRequest request, String name) {
+
+        if (request == null) {
+            logger.warn("getCookie(): Request is null!");
+            return null;
+        }
+
         Cookie cookie = null;
         Cookie cookies[] = request.getCookies();
         if (cookies != null) {
