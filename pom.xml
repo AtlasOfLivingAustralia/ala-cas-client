@@ -9,7 +9,6 @@
 	<name>ala-cas-client</name>
 	<url>http://maven.apache.org</url>
 
-	<!-- test -->
 
     <!--NQ: 2014-03-26 Set up the SCM details needed to manage a release point to the SCN directory that contains the POM -->
     <scm>
