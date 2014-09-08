@@ -57,11 +57,20 @@
 	</dependencies>
 
 	<distributionManagement>
+
+	  <!-- NOTE: repos on/in an amazon s3 bucket -->
 	  <repository>
-	    <id>ala-repository</id>
-		<uniqueVersion>false</uniqueVersion>
-	    <url>scp://maven.ala.org.au/data/maven</url>
+	    <id>aws-release</id>
+	    <name>AWS Release Repository</name>
+	    <url>s3://mbohun-maven/release</url>
 	  </repository>
+
+	  <snapshotRepository>
+	    <id>aws-snapshot</id>
+	    <name>AWS Snapshot Repository</name>
+	    <url>s3://mbohun-maven/snapshot</url>
+	  </snapshotRepository>
+
 	</distributionManagement>
 	
 	<build>
@@ -94,5 +103,17 @@
         			<version>2.5</version>
       			</plugin>
 		</plugins>
+
+		<extensions>
+
+		  <!-- NOTE: required for deploying into a maven repo hosted on/in an amazon s3 bucket -->
+		  <extension>
+		    <groupId>org.springframework.build</groupId>
+		    <artifactId>aws-maven</artifactId>
+		    <version>5.0.0.RELEASE</version>
+		  </extension>
+
+		</extensions>
+
 	</build>
 </project>
