@@ -6,3 +6,10 @@ jdk:
 branches:
   only:
     - master
+
+script: "mvn clean install deploy --settings=travis-maven-settings.xml"
+
+env:
+  global:
+    - secure: "fQXZHgCP1AAvGG+vUPUB73TDGEUlKlLqQ1Ee/P9uetzko37D6co9dW60w8s1yFPuu9Mfyp37/cEbhlvSEurDHCf36qfo3vDD/GUOWkxx2ALyP8Qyn3XxM25VtQkmBt02fK7xMTaommEnz174bbEI+50pOniKeF4LBOGJ1jb73EU="
+    - secure: "ZNTVVikAiVT+hT0efxID0bvvLRgOySLBbPsBmiB1OLD4Bf/Ns3E/+sk7ZUX0CRnzXclmzbfVZc9MPujGOakQSepepCX/KH5cEyLiuafw1ecb9jxIRFm9HqJlI1m2u5XCFx0xhtEz0mjLiRUaAob0uGzjPniUiNIl43pqynXk5RY="
