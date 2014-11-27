@@ -12,7 +12,7 @@
 
     <!--NQ: 2014-03-26 Set up the SCM details needed to manage a release point to the SCN directory that contains the POM -->
     <scm>
-        <developerConnection>scm:svn:https://ala-bie.googlecode.com/svn/trunk/ala-cas-client/</developerConnection>
+        <developerConnection>scm:git:https://github.com/AtlasOfLivingAustralia/ala-cas-client.git</developerConnection>
     </scm>
 
 	<properties>
@@ -60,12 +60,12 @@
                 <repository>
                         <id>ala-repo</id>
                         <name>Internal Releases</name>
-                        <url>http://ala-wonder.it.csiro.au/nexus/content/repositories/releases/</url>
+                        <url>http://nexus.ala.org.au/content/repositories/releases/</url>
                 </repository>
                 <snapshotRepository>
                         <id>ala-repo</id>
                         <name>Internal Releases</name>
-                        <url>http://ala-wonder.it.csiro.au/nexus/content/repositories/snapshots/</url>
+                        <url>http://nexus.ala.org.au/content/repositories/snapshots/</url>
                 </snapshotRepository>
         </distributionManagement>
 	
