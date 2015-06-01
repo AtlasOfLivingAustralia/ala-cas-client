@@ -3,7 +3,7 @@
 	
 	<groupId>au.org.ala</groupId>
 	<artifactId>ala-cas-client</artifactId>
-	<version>2.1</version>
+	<version>2.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
 	<name>ala-cas-client</name>
@@ -13,7 +13,7 @@
     <!--NQ: 2014-03-26 Set up the SCM details needed to manage a release point to the SCN directory that contains the POM -->
     <scm>
         <developerConnection>scm:git:https://github.com/AtlasOfLivingAustralia/ala-cas-client.git</developerConnection>
-      <tag>ala-cas-client-2.1</tag>
+      <tag>HEAD</tag>
   </scm>
 
 	<properties>
