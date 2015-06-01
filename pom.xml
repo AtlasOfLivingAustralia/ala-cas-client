@@ -1,18 +1,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
+    <parent>
+        <groupId>au.org.ala</groupId>
+        <artifactId>ala-parent-pom</artifactId>
+        <version>1.0</version>
+    </parent>
+
 	<groupId>au.org.ala</groupId>
 	<artifactId>ala-cas-client</artifactId>
 	<version>2.1</version>
 	<packaging>jar</packaging>
 	
 	<name>ala-cas-client</name>
-	<url>http://maven.apache.org</url>
+	<url>http://www.ala.org.au</url>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/AtlasOfLivingAustralia/ala-cas-client/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>Travis</system>
+        <url>http://travis-ci.org/AtlasOfLivingAustralia/ala-cas-client/</url>
+    </ciManagement>	
 
-
-    <!--NQ: 2014-03-26 Set up the SCM details needed to manage a release point to the SCN directory that contains the POM -->
     <scm>
-        <developerConnection>scm:git:https://github.com/AtlasOfLivingAustralia/ala-cas-client.git</developerConnection>
+        <connection>scm:git:git@github.com:AtlasOfLivingAustralia/ala-cas-client.git</connection>
+        <url>https://github.com/AtlasOfLivingAustralia/ala-cas-client</url>
+        <developerConnection>scm:git:git@github.com:AtlasOfLivingAustralia/ala-cas-client.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
 	<properties>
@@ -55,20 +70,6 @@
 	  	<scope>compile</scope>
 	  </dependency>
 	</dependencies>
-
-        <distributionManagement>
-                <repository>
-                        <id>ala-repo</id>
-                        <name>Internal Releases</name>
-                        <url>http://nexus.ala.org.au/content/repositories/releases/</url>
-                </repository>
-                <snapshotRepository>
-                        <id>ala-repo</id>
-                        <name>Internal Releases</name>
-                        <url>http://nexus.ala.org.au/content/repositories/snapshots/</url>
-                </snapshotRepository>
-        </distributionManagement>
-	
 	<build>
 		<plugins>
 			<plugin>
