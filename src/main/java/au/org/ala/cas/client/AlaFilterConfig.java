@@ -97,10 +97,17 @@ public class AlaFilterConfig implements FilterConfig {
     }
 
     public String getInitParameter(String name) {
-        logger.debug("Extracting property from the ala filter " + name + " "
-                + casProperties.getProperty(name));
-        return casProperties.getProperty(name,
-                embeddedFilterConfig.getInitParameter(name));
+        String property = casProperties.getProperty(name);
+        String initParam = embeddedFilterConfig.getInitParameter(name);
+        if (property == null) {
+            logger.debug("No property found for " + name +
+                    ", using filter init param value " + initParam + " instead.");
+            return initParam;
+        } else {
+            logger.debug("Preferring property from properties file for " + name + " "
+                    + property + " over the filter init param " + initParam);
+            return property;
+        }
     }
 
     /**
@@ -202,10 +209,18 @@ public class AlaFilterConfig implements FilterConfig {
         }
 
         public String getInitParameter(String name) {
-            logger.debug("Extracting property from the ala context " + name
-                    + " " + casProperties.getProperty(name));
-            return casProperties.getProperty(name,
-                    embeddedContext.getInitParameter(name));
+            final String property = casProperties.getProperty(name);
+            final String initParam = embeddedContext.getInitParameter(name);
+            if (property == null) {
+                logger.debug("No property found for " + name +
+                        ", using servlet context param value " + initParam + " instead.");
+                return initParam;
+            } else {
+                logger.debug("Preferring property from the properties file " + name
+                        + " " + property + " over the servlet context param " + initParam);
+
+                return property;
+            }
         }
 
         public Enumeration getInitParameterNames() {
@@ -243,7 +258,7 @@ public class AlaFilterConfig implements FilterConfig {
      * @author Natasha Carter (natasha.carter@csiro.au)
      * 
      */
-    public class MultiSourceEnumeration implements Enumeration {
+    public static class MultiSourceEnumeration implements Enumeration {
         Enumeration[] sources;        
 
         MultiSourceEnumeration(Enumeration[] sources) {
@@ -251,7 +266,7 @@ public class AlaFilterConfig implements FilterConfig {
         }
 
         /**
-         * @returns true when at least one of the enumerators has more elements
+         * @return true when at least one of the enumerators has more elements
          */
         public boolean hasMoreElements() {
             for (Enumeration source : sources) {
@@ -263,7 +278,7 @@ public class AlaFilterConfig implements FilterConfig {
         }
 
         /**
-         * @returns the next element in the collection. It will go through the
+         * @return the next element in the collection. It will go through the
          *          enumerators in the order that they are supplied.
          */
         public Object nextElement() {

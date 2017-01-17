@@ -156,7 +156,7 @@ public class UriFilter implements Filter {
                 Class<?> c = Class.forName(className);
                 filter = (Filter) c.newInstance();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Could not instantiate a new Filter with class " + className, e);
             }
             filter.init(filterConfig);
         }
@@ -172,7 +172,7 @@ public class UriFilter implements Filter {
             if (filter instanceof AuthenticationFilter) {
                 logger.debug("Request Uri = '" + requestUri + "'");
             }
-    
+
             if (PatternMatchingUtils.matches(requestUri, uriExclusionPatterns)) {
                 if (filter instanceof AuthenticationFilter) {
                     logger.debug("Ignoring URI because it matches " + URI_EXCLUSION_FILTER_PATTERN);
@@ -184,7 +184,7 @@ public class UriFilter implements Filter {
                 if (filter instanceof AuthenticationFilter) {
                     logger.debug("Forwarding URI '" + requestUri + "' to CAS authentication filters because it matches " + URI_FILTER_PATTERN);
                 } else {
-                    logger.debug("No action taken - no matching pattern found in uriInclusionPatterns for " + requestUri);
+                    logger.debug("Forwarding URI '" + requestUri + "' to " + filter.getClass().getName() + " filter because it matches " + URI_FILTER_PATTERN);
                 }
                 filter.doFilter(request, response, chain);
             } else if (PatternMatchingUtils.matches(requestUri, authOnlyIfLoggedInPatterns) &&
@@ -192,7 +192,7 @@ public class UriFilter implements Filter {
                 if (filter instanceof AuthenticationFilter) {
                     logger.debug("Forwarding URI '" + requestUri + "' to CAS authentication filters because it matches " + AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN + " and ALA-Auth cookie exists");
                 } else {
-                    logger.debug("No action taken - no matching pattern found in authOnlyIfLoggedInPatterns for " + requestUri);
+                    logger.debug("Forwarding URI '" + requestUri + "' to " + filter.getClass().getName() + " filter because it matches " + AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN + " and ALA-Auth cookie exists");
                 }
                 filter.doFilter(request, response, chain);
             } else {

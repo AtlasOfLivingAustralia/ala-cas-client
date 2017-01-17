@@ -6,6 +6,9 @@ import org.jasig.cas.client.util.CommonUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Helper methods that simplify getting key User Principal attributes from a Web Request
@@ -15,11 +18,11 @@ public class AuthenticationUtils {
     private final static Logger logger = Logger.getLogger(AuthenticationUtils.class);
 
     // Attribute keys for pulling out values from the AttributePrincipal
-    private static final String ATTR_USER_ID = "userid";
-    private static final String ATTR_EMAIL_ADDRESS = "email";
-    private static final String ATTR_FIRST_NAME = "firstname";
-    private static final String ATTR_LAST_NAME = "lastname";
-    private static final String ATTR_ROLES = "authority";
+    public static final String ATTR_USER_ID = "userid";
+    public static final String ATTR_EMAIL_ADDRESS = "email";
+    public static final String ATTR_FIRST_NAME = "firstname";
+    public static final String ATTR_LAST_NAME = "lastname";
+    public static final String ATTR_ROLES = "authority";
 
     /**
      *
@@ -62,6 +65,23 @@ public class AuthenticationUtils {
     }
 
     /**
+     *
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
+     * @return The users roles in a set or an empty set if the user is not authenticated
+     */
+    public static Set<String> getUserRoles(final HttpServletRequest request) {
+        String roles = getPrincipalAttribute(request, ATTR_ROLES);
+
+        Set<String> retVal = new HashSet<String>();
+        if (CommonUtils.isNotBlank(roles)) {
+            for (String role: roles.split(",")) {
+                retVal.add(role.trim());
+            }
+        }
+        return retVal;
+    }
+
+    /**
      * Tests to see if the currently authenticated user has the specified role
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @param role The name of the role to test. E.g. ALA_ADMIN
@@ -93,7 +113,7 @@ public class AuthenticationUtils {
      * @param attributeKey The name of the attribute to retrieve
      * @return The value of the specified attribute, or null
      */
-    private static String getPrincipalAttribute(final HttpServletRequest request, final String attributeKey) {
+    public static String getPrincipalAttribute(final HttpServletRequest request, final String attributeKey) {
 
         if (request == null) {
             logger.debug(String.format("Request is null! (Looking for attribute %s)", attributeKey));
