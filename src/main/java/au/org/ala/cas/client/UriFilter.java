@@ -36,22 +36,24 @@ import au.org.ala.cas.util.PatternMatchingUtils;
  * Meta filter that provides filtering based on URI patterns that require authentication (and thus redirection) to the CAS server.
  * <p>
  * There are 3 possible filter configurations and these filtering criteria are applied in the following order,
- * <p>
+ * </p>
  * <table border="1">
- * <tr><th>Criterion</th><th>context-param</th><th>Required</th><th>Description</th></tr>
- * <tr><td>URI exclusion</td><td>uriExclusionFilterPattern</td><td>No</td><td>URIs that should not be subject to CAS authentication</td></tr>
- * <tr><td>URI inclusion</td><td>uriFilterPattern</td><td>No</td><td>URIs that are to be subject to CAS authentication</td></tr>
- * <tr><td>Only if logged in</td><td>authenticateOnlyIfLoggedInFilterPattern</td><td>No</td><td>URIs that should be subject to CAS authentication only if logged in (indicated by the presence of the ALA-Auth cookie)</td></tr>
+ *     <caption>UriFilter configuration order</caption>
+ *     <tr><th>Criterion</th><th>context-param</th><th>Required</th><th>Description</th></tr>
+ *     <tr><td>URI exclusion</td><td>uriExclusionFilterPattern</td><td>No</td><td>URIs that should not be subject to CAS authentication</td></tr>
+ *     <tr><td>URI inclusion</td><td>uriFilterPattern</td><td>No</td><td>URIs that are to be subject to CAS authentication</td></tr>
+ *     <tr><td>Only if logged in</td><td>authenticateOnlyIfLoggedInFilterPattern</td><td>No</td><td>URIs that should be subject to CAS authentication only if logged in (indicated by the presence of the ALA-Auth cookie)</td></tr>
  * </table>
  * <p>
- * The list of URI patterns is specified as a comma delimited list of regular expressions in a &lt;context-param&gt;</code>.
+ * The list of URI patterns is specified as a comma delimited list of regular expressions in a <code>&lt;context-param&gt;</code>.
  * <p>
  * So if a request's path matches one of the URI patterns then the filter specified by the <code>filterClass</code> &lt;init-param&gt; is invoked.
  * <p>
  * The <code>contextPath</code> parameter value (if present) is prefixed to each URI pattern defined for each filter.
  * <p>
  * An example of usage is shown in the following web.xml fragment,
- * <p><pre>
+ * </p>
+ * <pre>
      ...
      &lt;context-param&gt;
          &lt;param-name&gt;contextPath&lt;/param-name&gt;
@@ -113,11 +115,12 @@ public class UriFilter implements Filter {
             //
             this.contextPath = filterConfig.getServletContext().getInitParameter("contextPath");
             if (this.contextPath == null) {
-                this.contextPath = "";
+                this.contextPath = filterConfig.getServletContext().getContextPath();
+                logger.debug("Using ServletContext contextPath: " + this.contextPath);
             } else {
-                logger.debug("Context path = '" + contextPath + "'");
+                logger.warn("Overriding ServletContext contextPath: " + filterConfig.getServletContext().getContextPath() + " with ServletContext init-param value: " + this.contextPath);
             }
-    
+
             //
             // Get URI inclusion filter patterns
             //
@@ -177,7 +180,7 @@ public class UriFilter implements Filter {
                 if (filter instanceof AuthenticationFilter) {
                     logger.debug("Ignoring URI because it matches " + URI_EXCLUSION_FILTER_PATTERN);
                 } else {
-                    logger.debug("No action taken as matches uriExclusionPatterns for " + requestUri);
+                    logger.debug("No action taken as matches " + URI_EXCLUSION_FILTER_PATTERN + " for " + requestUri);
                 }
                 chain.doFilter(request, response);
             } else if (PatternMatchingUtils.matches(requestUri, uriInclusionPatterns)) {

@@ -4,16 +4,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import javax.servlet.*;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.log4j.Logger;
 
@@ -30,8 +24,7 @@ public class AlaFilterConfig implements FilterConfig {
     private FilterConfig embeddedFilterConfig;
     private ServletContext embeddedServletContext;
     private Properties casProperties;
-    private java.util.List<String> whitelist;
-    
+
 
     public AlaFilterConfig(FilterConfig config) {
         this.embeddedFilterConfig = config;
@@ -63,7 +56,7 @@ public class AlaFilterConfig implements FilterConfig {
                 p.load(new java.io.FileInputStream(new File(filename)));
                 //remove the properties that don't make up the cas configuration
                 if(p.containsKey("casProperties")){
-                    whitelist = Arrays.asList(p.getProperty("casProperties").split(","));
+                    List<String> whitelist = Arrays.asList(p.getProperty("casProperties").split(","));
                     for(String item: whitelist){
                         Object value = p.getProperty(item);
                         if(value != null){
@@ -114,10 +107,11 @@ public class AlaFilterConfig implements FilterConfig {
      * This class acts as a Enumerator. It will enumerate over the
      * cas.properties first and then the embedded filter properties.
      */
-    public Enumeration getInitParameterNames() {
-        return new MultiSourceEnumeration(new Enumeration[] {
-                casProperties.keys(),
-                embeddedFilterConfig.getInitParameterNames() });
+    public Enumeration<String> getInitParameterNames() {
+        Enumeration<String> propertyKeys = (Enumeration<String>)(Enumeration<?>) casProperties.keys();
+        return MultiSourceEnumeration.from(
+                propertyKeys,
+                embeddedFilterConfig.getInitParameterNames());
 
     }
 
@@ -143,6 +137,10 @@ public class AlaFilterConfig implements FilterConfig {
             return embeddedContext.getContext(uripath);
         }
 
+        public String getContextPath() {
+            return embeddedContext.getContextPath();
+        }
+
         public int getMajorVersion() {
             return embeddedContext.getMajorVersion();
         }
@@ -151,11 +149,19 @@ public class AlaFilterConfig implements FilterConfig {
             return embeddedContext.getMinorVersion();
         }
 
+        public int getEffectiveMajorVersion() {
+            return embeddedContext.getEffectiveMajorVersion();
+        }
+
+        public int getEffectiveMinorVersion() {
+            return embeddedContext.getEffectiveMinorVersion();
+        }
+
         public String getMimeType(String file) {
             return embeddedContext.getMimeType(file);
         }
 
-        public Set getResourcePaths(String path) {
+        public Set<String> getResourcePaths(String path) {
             return embeddedContext.getResourcePaths(path);
         }
 
@@ -179,11 +185,11 @@ public class AlaFilterConfig implements FilterConfig {
             return embeddedContext.getServlet(name);
         }
 
-        public Enumeration getServlets() {
+        public Enumeration<Servlet> getServlets() {
             return embeddedContext.getServlets();
         }
 
-        public Enumeration getServletNames() {
+        public Enumeration<String> getServletNames() {
             return embeddedContext.getServletNames();
         }
 
@@ -223,17 +229,20 @@ public class AlaFilterConfig implements FilterConfig {
             }
         }
 
-        public Enumeration getInitParameterNames() {
-            return new MultiSourceEnumeration(new Enumeration[] {
-                    casProperties.keys(),
-                    embeddedContext.getInitParameterNames() });
+        public Enumeration<String> getInitParameterNames() {
+            Enumeration<String> casKeys = (Enumeration<String>)(Enumeration<?>) casProperties.keys();
+            return MultiSourceEnumeration.from(casKeys, embeddedContext.getInitParameterNames());
+        }
+
+        public boolean setInitParameter(String name, String value) {
+            return embeddedContext.setInitParameter(name, value);
         }
 
         public Object getAttribute(String name) {
             return embeddedContext.getAttribute(name);
         }
 
-        public Enumeration getAttributeNames() {
+        public Enumeration<String> getAttributeNames() {
             return embeddedContext.getAttributeNames();
         }
 
@@ -249,6 +258,98 @@ public class AlaFilterConfig implements FilterConfig {
             return embeddedContext.getServletContextName();
         }
 
+        public ServletRegistration.Dynamic addServlet(String servletName, String className) {
+            return embeddedContext.addServlet(servletName, className);
+        }
+
+        public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
+            return embeddedContext.addServlet(servletName, servlet);
+        }
+
+        public ServletRegistration.Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
+            return embeddedContext.addServlet(servletName, servletClass);
+        }
+
+        public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
+            return embeddedContext.createServlet(clazz);
+        }
+
+        public ServletRegistration getServletRegistration(String servletName) {
+            return embeddedContext.getServletRegistration(servletName);
+        }
+
+        public Map<String, ? extends ServletRegistration> getServletRegistrations() {
+            return embeddedContext.getServletRegistrations();
+        }
+
+        public FilterRegistration.Dynamic addFilter(String filterName, String className) {
+            return embeddedContext.addFilter(filterName, className);
+        }
+
+        public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
+            return embeddedContext.addFilter(filterName, filter);
+        }
+
+        public FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
+            return embeddedContext.addFilter(filterName, filterClass);
+        }
+
+        public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
+            return embeddedContext.createFilter(clazz);
+        }
+
+        public FilterRegistration getFilterRegistration(String filterName) {
+            return embeddedContext.getFilterRegistration(filterName);
+        }
+
+        public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+            return embeddedContext.getFilterRegistrations();
+        }
+
+        public SessionCookieConfig getSessionCookieConfig() {
+            return embeddedContext.getSessionCookieConfig();
+        }
+
+        public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes) {
+            embeddedContext.setSessionTrackingModes(sessionTrackingModes);
+        }
+
+        public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
+            return embeddedContext.getDefaultSessionTrackingModes();
+        }
+
+        public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
+            return embeddedContext.getEffectiveSessionTrackingModes();
+        }
+
+        public void addListener(String className) {
+            embeddedContext.addListener(className);
+        }
+
+        public <T extends EventListener> void addListener(T t) {
+            embeddedContext.addListener(t);
+        }
+
+        public void addListener(Class<? extends EventListener> listenerClass) {
+            embeddedContext.addListener(listenerClass);
+        }
+
+        public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
+            return embeddedContext.createListener(clazz);
+        }
+
+        public JspConfigDescriptor getJspConfigDescriptor() {
+            return embeddedContext.getJspConfigDescriptor();
+        }
+
+        public ClassLoader getClassLoader() {
+            return embeddedContext.getClassLoader();
+        }
+
+        public void declareRoles(String... roleNames) {
+            embeddedContext.declareRoles(roleNames);
+        }
+
     }
 
     /**
@@ -258,10 +359,10 @@ public class AlaFilterConfig implements FilterConfig {
      * @author Natasha Carter (natasha.carter@csiro.au)
      * 
      */
-    public static class MultiSourceEnumeration implements Enumeration {
-        Enumeration[] sources;        
+    public static class MultiSourceEnumeration<T> implements Enumeration<T> {
+        Enumeration<T>[] sources;
 
-        MultiSourceEnumeration(Enumeration[] sources) {
+        MultiSourceEnumeration(Enumeration<T>... sources) {
             this.sources = sources;
         }
 
@@ -269,7 +370,7 @@ public class AlaFilterConfig implements FilterConfig {
          * @return true when at least one of the enumerators has more elements
          */
         public boolean hasMoreElements() {
-            for (Enumeration source : sources) {
+            for (Enumeration<T> source : sources) {
                 if (source.hasMoreElements()) {
                     return true;
                 }
@@ -281,8 +382,8 @@ public class AlaFilterConfig implements FilterConfig {
          * @return the next element in the collection. It will go through the
          *          enumerators in the order that they are supplied.
          */
-        public Object nextElement() {
-            for (Enumeration source : sources) {
+        public T nextElement() {
+            for (Enumeration<T> source : sources) {
                 if (source.hasMoreElements()) {
                     return source.nextElement();
                 }
@@ -290,5 +391,8 @@ public class AlaFilterConfig implements FilterConfig {
             return null;
         }
 
+        static <T> Enumeration<T> from(Enumeration<T>... enumerations) {
+            return new MultiSourceEnumeration<T>(enumerations);
+        }
     }
 }

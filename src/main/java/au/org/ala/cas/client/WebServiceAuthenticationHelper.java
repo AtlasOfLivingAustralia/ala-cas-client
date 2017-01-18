@@ -28,10 +28,11 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 
 /**
+ * <p>
  * Helper class that authenticates user credentials prior to invoking a web service that requires authentication.
  * Authentication is carried out during construction and the CAS generated Ticket Granting Ticket is saved for
  * subsequent web service invocations.
- * <p/>
+ * <p>
  * Invoking a web service using the invoke() method involves obtaining a CAS service ticket which is then passed to
  * the web service provider as a URI parameter.  The web service provider application then obtains the user attributes
  * via its CAS validation filter.
