@@ -90,9 +90,9 @@ public class UriFilter implements Filter {
 
     private final static Logger logger = Logger.getLogger(UriFilter.class);
 
-    private static final String URI_FILTER_PATTERN = "uriFilterPattern";
-    private static final String URI_EXCLUSION_FILTER_PATTERN = "uriExclusionFilterPattern";
-    private static final String AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN = "authenticateOnlyIfLoggedInFilterPattern";
+    public static final String URI_FILTER_PATTERN = "uriFilterPattern";
+    public static final String URI_EXCLUSION_FILTER_PATTERN = "uriExclusionFilterPattern";
+    public static final String AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN = "authenticateOnlyIfLoggedInFilterPattern";
 
     private Filter filter;
     private String contextPath;
