@@ -67,6 +67,26 @@ public class AuthenticationUtils {
     /**
      *
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
+     * @return The users first name, or null if not authenticated
+     */
+    public static String getFirstName(final HttpServletRequest request) {
+        String firstname = getPrincipalAttribute(request, ATTR_FIRST_NAME);
+        return firstname;
+    }
+
+    /**
+     *
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
+     * @return The users first name, or null if not authenticated
+     */
+    public static String getLastName(final HttpServletRequest request) {
+        String lastname = getPrincipalAttribute(request, ATTR_LAST_NAME);
+        return lastname;
+    }
+
+    /**
+     *
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @return The users roles in a set or an empty set if the user is not authenticated
      */
     public static Set<String> getUserRoles(final HttpServletRequest request) {
