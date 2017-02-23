@@ -1,12 +1,12 @@
 package au.org.ala.cas.util;
 
-import org.apache.log4j.Logger;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.jasig.cas.client.util.CommonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class AuthenticationUtils {
 
-    private final static Logger logger = Logger.getLogger(AuthenticationUtils.class);
+    private final static Logger logger = LoggerFactory.getLogger(AuthenticationUtils.class);
 
     // Attribute keys for pulling out values from the AttributePrincipal
     public static final String ATTR_USER_ID = "userid";
@@ -41,7 +41,7 @@ public class AuthenticationUtils {
     public static String getEmailAddress(final HttpServletRequest request) {
         String email = getPrincipalAttribute(request, ATTR_EMAIL_ADDRESS);
         if (email == null) {
-            logger.debug(String.format("Unable to retrieve email from User Principal. Looking in ALA cookie."));
+            logger.debug("Unable to retrieve email from User Principal. Looking in ALA cookie.");
             email = AuthenticationCookieUtils.getUserName(request);
         }
         return email;
@@ -55,7 +55,7 @@ public class AuthenticationUtils {
     public static String getDisplayName(final HttpServletRequest request) {
         String firstname = getPrincipalAttribute(request, ATTR_FIRST_NAME);
         String lastname = getPrincipalAttribute(request, ATTR_LAST_NAME);
-        String displayName = null;
+        String displayName = "";
         if (CommonUtils.isNotBlank(firstname) && CommonUtils.isNotBlank(lastname)) {
             displayName = String.format("%s %s", firstname, lastname);
         } else if (CommonUtils.isNotBlank(firstname) || CommonUtils.isNotBlank(lastname)) {
@@ -136,7 +136,7 @@ public class AuthenticationUtils {
     public static String getPrincipalAttribute(final HttpServletRequest request, final String attributeKey) {
 
         if (request == null) {
-            logger.debug(String.format("Request is null! (Looking for attribute %s)", attributeKey));
+            logger.debug("Request is null! (Looking for attribute {})", attributeKey);
             return null;
         }
 
@@ -144,7 +144,7 @@ public class AuthenticationUtils {
         if (principal != null && principal instanceof AttributePrincipal) {
             AttributePrincipal attrPrincipal = (AttributePrincipal) principal;
             Object attrValue = attrPrincipal.getAttributes().get(attributeKey);
-            logger.debug(String.format("getPrincipalAttribute(%s) = %s", attributeKey, attrValue ==  null ? "null" : attrValue.toString()));
+            logger.debug("getPrincipalAttribute({}) = {}", attributeKey, attrValue ==  null ? "null" : attrValue.toString());
             return attrValue == null ? null : attrValue.toString();
         }
 

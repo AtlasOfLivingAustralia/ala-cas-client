@@ -14,18 +14,22 @@
  ***************************************************************************/
 package au.org.ala.cas.client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.log4j.Logger;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -42,7 +46,7 @@ import org.apache.log4j.Logger;
  */
 public class WebServiceAuthenticationHelper {
 	
-	private final static Logger logger = Logger.getLogger(UriFilter.class);
+	private final static Logger logger = LoggerFactory.getLogger(UriFilter.class);
 	private final static String CAS_CONTEXT = "/cas/v1/tickets/";
 	
 	private final String casServer;
@@ -85,45 +89,54 @@ public class WebServiceAuthenticationHelper {
 	 * @return The Ticket Granting Ticket id
 	 */
 	private String getTicketGrantingTicket(final String server, final String username, final String password) {
-		final HttpClient client = new HttpClient();
+		final CloseableHttpClient client = HttpClients.createDefault();
 
-		final PostMethod post = new PostMethod(server + CAS_CONTEXT);
-
-		post.setRequestBody(new NameValuePair[] {
-				new NameValuePair("username", username),
-				new NameValuePair("password", password) });
+		final HttpPost post = new HttpPost(server + CAS_CONTEXT);
 
 		try {
-			client.executeMethod(post);
+            post.setEntity(new UrlEncodedFormEntity(
+                    Arrays.asList(
+                            new BasicNameValuePair("username", username),
+                            new BasicNameValuePair("password", password))
+            ));
 
-			final String response = post.getResponseBodyAsString();
+            CloseableHttpResponse call = client.execute(post);
 
-			switch (post.getStatusCode()) {
-			case 201: {
-				final Matcher matcher = Pattern.compile(
-						".*action=\".*/(.*?)\".*").matcher(response);
+            final String response;
+            final int statusCode;
+            try {
+                response = EntityUtils.toString(call.getEntity());
+                statusCode = call.getStatusLine().getStatusCode();
+            } finally {
+                call.close();
+            }
 
-				if (matcher.matches())
-					return matcher.group(1);
+            switch (statusCode) {
+                case 201: {
+                    final Matcher matcher = Pattern.compile(
+                            ".*action=\".*/(.*?)\".*").matcher(response);
 
-				logger.warn("Successful ticket granting request, but no ticket found!");
-				logger.info("Response (1k): " + getMaxString(response));
-				break;
-			}
+                    if (matcher.matches())
+                        return matcher.group(1);
 
-			default:
-				logger.warn("Invalid response code (" + post.getStatusCode() + ") from CAS server!");
-				logger.info("Response (1k): " + getMaxString(response));
-				break;
-			}
+                    logger.warn("Successful ticket granting request, but no ticket found!");
+                    logger.info("Response (1k): {}", getMaxString(response));
+                    break;
+                }
+
+                default:
+                    logger.warn("Invalid response code ({}) from CAS server!", statusCode);
+                    logger.info("Response (1k): {}", getMaxString(response));
+                    break;
+            }
 		}
 
 		catch (final IOException e) {
-			logger.warn(e.getMessage(), e);
+			logger.warn("Exception calling {}", post, e);
 		}
 
 		finally {
-			post.releaseConnection();
+			post.reset();
 		}
 
 		return null;
@@ -141,34 +154,43 @@ public class WebServiceAuthenticationHelper {
 		if (ticketGrantingTicket == null)
 			return null;
 
-		final HttpClient client = new HttpClient();
+        final CloseableHttpClient client = HttpClients.createDefault();
 
-		final PostMethod post = new PostMethod(server + CAS_CONTEXT + ticketGrantingTicket);
-
-		post.setRequestBody(new NameValuePair[] { new NameValuePair("service", service) });
+		final HttpPost post = new HttpPost(server + CAS_CONTEXT + ticketGrantingTicket);
 
 		try {
-			client.executeMethod(post);
+            post.setEntity(new UrlEncodedFormEntity(
+                    Collections.singletonList(new BasicNameValuePair("service", service))
+            ));
 
-			final String response = post.getResponseBodyAsString();
+            final String response;
+            final int statusCode;
+            CloseableHttpResponse call = client.execute(post);
+            try {
 
-			switch (post.getStatusCode()) {
+                response = EntityUtils.toString(call.getEntity());
+                statusCode = call.getStatusLine().getStatusCode();
+            } finally {
+                call.close();
+            }
+
+            switch (statusCode) {
 			case 200:
 				return response;
 
 			default:
-				logger.warn("Invalid response code (" + post.getStatusCode() + ") from CAS server!");
-				logger.info("Response (1k): " + getMaxString(response));
+				logger.warn("Invalid response code ({}) from CAS server!", statusCode);
+				logger.info("Response (1k): {}", getMaxString(response));
 				break;
 			}
 		}
 
 		catch (final IOException e) {
-			logger.warn(e.getMessage(), e);
+			logger.warn("Exception calling {}", post, e);
 		}
 
 		finally {
-			post.releaseConnection();
+			post.reset();
 		}
 
 		return null;
@@ -182,61 +204,42 @@ public class WebServiceAuthenticationHelper {
 	 * @return Web service response as a string
 	 */
 	private String getServiceResponse(final String url, final String serviceTicket) {
-		final HttpClient client = new HttpClient();
+        final CloseableHttpClient client = HttpClients.createDefault();
 
-		final GetMethod get = new GetMethod(url + "?ticket=" + serviceTicket);
+		final HttpGet get = new HttpGet(url + "?ticket=" + serviceTicket);
 
 		try {
-			client.executeMethod(get);
+            CloseableHttpResponse call = client.execute(get);
 
-			final InputStream response = get.getResponseBodyAsStream();
+            final String response;
+            final int statusCode;
+            try {
+                response = EntityUtils.toString(call.getEntity());
+                statusCode = call.getStatusLine().getStatusCode();
+            } finally {
+                call.close();
+            }
 
-			switch (get.getStatusCode()) {
+            switch (statusCode) {
 			case 200:
-				return getStringFromInputStream(response);
+				return response;
 
 			default:
-				logger.warn("Invalid response code (" + get.getStatusCode() + ") from web service!");
-				logger.info("Response (1k): " +  getMaxString(getStringFromInputStream(response)));
+				logger.warn("Invalid response code ({}) from web service!", statusCode);
+				logger.info("Response (1k): {}",  getMaxString(response));
 				break;
 			}
 		}
 
 		catch (final IOException e) {
-			logger.warn(e.getMessage(), e);
+			logger.warn("Exception calling {}", get, e);
 		}
 
 		finally {
-			get.releaseConnection();
+			get.reset();
 		}
 
 		return null;
-	}
-
-	/**
-	 * Builds a string from an InputStream.
-	 * 
-	 * @param is InputStream
-	 * @return resulting string
-	 * @throws IOException
-	 */
-	private String getStringFromInputStream(InputStream is) throws IOException {
-		if (is != null) {
-			StringBuilder sb = new StringBuilder();
-			String line;
-
-			try {
-				BufferedReader reader = new BufferedReader( new InputStreamReader(is, "UTF-8"));
-				while ((line = reader.readLine()) != null) {
-					sb.append(line);
-				}
-			} finally {
-				is.close();
-			}
-			return sb.toString();
-		} else {
-			return "";
-		}
 	}
 
 	/**

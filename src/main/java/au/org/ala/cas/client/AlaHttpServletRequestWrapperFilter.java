@@ -16,6 +16,7 @@ package au.org.ala.cas.client;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collection;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,62 +28,81 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 
 import org.jasig.cas.client.authentication.AttributePrincipal;
+import org.jasig.cas.client.configuration.ConfigurationKeys;
 import org.jasig.cas.client.util.AbstractCasFilter;
 import org.jasig.cas.client.util.AbstractConfigurationFilter;
 import org.jasig.cas.client.util.CommonUtils;
 import org.jasig.cas.client.validation.Assertion;
 
 /**
- * Filter that wraps the HttpServletRequestWrapper to override the following methods,
+ * Implementation of a filter that wraps the normal HttpServletRequest with a
+ * wrapper that overrides the following methods to provide data from the
+ * CAS Assertion:
  * <ul>
  * <li>{@link HttpServletRequest#getUserPrincipal()}</li>
  * <li>{@link HttpServletRequest#getRemoteUser()}</li>
  * <li>{@link HttpServletRequest#isUserInRole(String)}</li>
- * </ul><p>
+ * </ul>
+ * <p>
+ * This filter needs to be configured in the chain so that it executes after
+ * both the authentication and the validation filters.
+ * <p>
  * This code has been shamelessly copied from {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
  * since that class is final and cannot be extended.
  * <p>
  * Only the <code>isUserInRole()</code> needed to
- * be overridden to accommodate a csv list of roles in the returned user attributes.
+ * be overridden to accommodate a csv list of roles in the returned user attributes.  This wrapper also supports
+ * a list of roles.
  * 
  * @author peter.flemming@csiro.au
+ * @author simon.bear@csiro.au
  *
  */
 public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFilter {
-	
-	private String roleAttribute;
-	private boolean ignoreCase;
+    /** Name of the attribute used to answer role membership queries */
+    private String roleAttribute;
 
-	public void init(FilterConfig filterConfig) throws ServletException {
-	    filterConfig = new AlaFilterConfig(filterConfig);
-        this.roleAttribute = getPropertyFromInitParams(filterConfig, "roleAttribute", "authority");
-        this.ignoreCase = Boolean.parseBoolean(getPropertyFromInitParams(filterConfig, "ignoreCase", "true"));
-	}
+    /** Whether or not to ignore case in role membership queries */
+    private boolean ignoreCase;
 
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-        final AttributePrincipal principal = retrievePrincipalFromSessionOrRequest(request);
+    public void destroy() {
+        // nothing to do
+    }
 
-        chain.doFilter(new AlaHttpServletRequestWrapper((HttpServletRequest) request, principal), response);
-	}
+    /**
+     * Wraps the HttpServletRequest in a wrapper class that delegates
+     * <code>request.getRemoteUser</code> to the underlying Assertion object
+     * stored in the user session.
+     */
+    public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
+                         final FilterChain filterChain) throws IOException, ServletException {
+        final AttributePrincipal principal = retrievePrincipalFromSessionOrRequest(servletRequest);
 
-    private AttributePrincipal retrievePrincipalFromSessionOrRequest(final ServletRequest servletRequest) {
+        filterChain.doFilter(new AlaHttpServletRequestWrapperFilter.CasHttpServletRequestWrapper((HttpServletRequest) servletRequest, principal),
+                servletResponse);
+    }
+
+    protected AttributePrincipal retrievePrincipalFromSessionOrRequest(final ServletRequest servletRequest) {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpSession session = request.getSession(false);
-        final Assertion assertion = (Assertion) (session == null ? request.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION) : session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION));
+        final Assertion assertion = (Assertion) (session == null ? request
+                .getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION) : session
+                .getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION));
 
         return assertion == null ? null : assertion.getPrincipal();
     }
 
-    public void destroy() {
-		// Do nothing
-	}
+    public void init(final FilterConfig filterConfig) throws ServletException {
+        super.init(filterConfig);
+        this.roleAttribute = getString(ConfigurationKeys.ROLE_ATTRIBUTE);
+        this.ignoreCase = getBoolean(ConfigurationKeys.IGNORE_CASE);
+    }
 
-    class AlaHttpServletRequestWrapper extends HttpServletRequestWrapper {
+    final class CasHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
         private final AttributePrincipal principal;
 
-        AlaHttpServletRequestWrapper(final HttpServletRequest request, final AttributePrincipal principal) {
+        CasHttpServletRequestWrapper(final HttpServletRequest request, final AttributePrincipal principal) {
             super(request);
             this.principal = principal;
         }
@@ -97,37 +117,43 @@ public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFil
 
         public boolean isUserInRole(final String role) {
             if (CommonUtils.isBlank(role)) {
-                log.debug("No valid role provided.  Returning false.");
+                logger.debug("No valid role provided.  Returning false.");
                 return false;
             }
 
             if (this.principal == null) {
-                log.debug("No Principal in Request.  Returning false.");
+                logger.debug("No Principal in Request.  Returning false.");
                 return false;
             }
 
             if (CommonUtils.isBlank(roleAttribute)) {
-                log.debug("No Role Attribute Configured. Returning false.");
+                logger.debug("No Role Attribute Configured. Returning false.");
                 return false;
             }
 
-            String roles = (String) this.principal.getAttributes().get(roleAttribute);
-            
-    		if (roles != null && !roles.equals("")) {
-    			for (String roleValue : roles.split(",")) {
-    				if (rolesEqual(role, roleValue.trim())) {
-                        log.debug("User [" + getRemoteUser() + "] is in role [" + role + "]: " + true);
-                        return true;
-    				}
-    			}
-    		} else {
-    			log.debug("No role values in attributes. Returning false.");
-    			return false;
-    		}
+            final Object value = this.principal.getAttributes().get(roleAttribute);
 
-            return false;
+            if (value instanceof Collection<?>) {
+                for (final Object o : (Collection<?>) value) {
+                    if (rolesEqual(role, o)) {
+                        logger.debug("User [{}] is in role [{}]: true", getRemoteUser(), role);
+                        return true;
+                    }
+                }
+            } else if (value instanceof String && CommonUtils.isNotBlank((String)value)) {
+                for (final String roleValue : ((String) value).split(",")) {
+                    if (rolesEqual(role, roleValue.trim())) {
+                        logger.debug("User [{}] is in role [{}]: true", getRemoteUser(), role);
+                        return true;
+                    }
+                }
+            }
+
+            final boolean isMember = rolesEqual(role, value);
+            logger.debug("User [{}] is in role [{}]: {}", getRemoteUser(), role, isMember);
+            return isMember;
         }
-        
+
         /**
          * Determines whether the given role is equal to the candidate
          * role attribute taking into account case sensitivity.
@@ -137,8 +163,8 @@ public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFil
          *
          * @return True if roles are equal, false otherwise.
          */
-        private boolean rolesEqual(final String given, final String candidate) {
-            return ignoreCase ? given.equalsIgnoreCase(candidate) : given.equals(candidate);
+        private boolean rolesEqual(final String given, final Object candidate) {
+            return ignoreCase ? given.equalsIgnoreCase(candidate.toString()) : given.equals(candidate);
         }
     }
 }

@@ -1,13 +1,14 @@
 package au.org.ala.cas.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
-
 public class AuthenticationCookieUtils {
     
-    private final static Logger logger = Logger.getLogger(AuthenticationCookieUtils.class);
+    private final static Logger logger = LoggerFactory.getLogger(AuthenticationCookieUtils.class);
     
     public static final String ALA_AUTH_COOKIE = "ALA-Auth";
 
@@ -51,9 +52,9 @@ public class AuthenticationCookieUtils {
         }
         
         if (cookie == null) {
-            logger.debug("Cookie " + name + " not found");
+            logger.debug("Cookie {} not found", name);
         } else {
-            logger.debug("Cookie " + name + " found");
+            logger.debug("Cookie {} found", name);
         }
         
         return cookie;

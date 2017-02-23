@@ -19,11 +19,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PatternMatchingUtils {
 
-	private final static Logger logger = Logger.getLogger(PatternMatchingUtils.class);
+	private final static Logger logger = LoggerFactory.getLogger(PatternMatchingUtils.class);
 
 	public static List<Pattern> getPatternList(String context, String regexPatterns) {
 		List<Pattern> patternList = new ArrayList<Pattern>();
@@ -40,7 +41,7 @@ public class PatternMatchingUtils {
 	public static boolean matches(String str, List<Pattern> patterns) {
 		for (Pattern pattern : patterns) {
 			Matcher matcher = pattern.matcher(str);
-			logger.trace("Matching string '" + str + "' against Pattern '" + pattern + "'");
+			logger.trace("Matching string '{}' against Pattern '{}'", str, pattern);
 			if (matcher.matches()) {
 				logger.trace("Matches!");
 				return true;

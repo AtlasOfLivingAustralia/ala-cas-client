@@ -26,11 +26,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.jasig.cas.client.authentication.AuthenticationFilter;
 
 import au.org.ala.cas.util.AuthenticationCookieUtils;
 import au.org.ala.cas.util.PatternMatchingUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Meta filter that provides filtering based on URI patterns that require authentication (and thus redirection) to the CAS server.
@@ -49,16 +50,12 @@ import au.org.ala.cas.util.PatternMatchingUtils;
  * <p>
  * So if a request's path matches one of the URI patterns then the filter specified by the <code>filterClass</code> &lt;init-param&gt; is invoked.
  * <p>
- * The <code>contextPath</code> parameter value (if present) is prefixed to each URI pattern defined for each filter.
+ * The <code>contextPath</code> from the <code>ServletContext</code> is prefixed to each URI pattern defined for each filter.
  * <p>
  * An example of usage is shown in the following web.xml fragment,
  * </p>
  * <pre>
      ...
-     &lt;context-param&gt;
-         &lt;param-name&gt;contextPath&lt;/param-name&gt;
-         &lt;param-value&gt;/biocache-webapp&lt;/param-value&gt;
-     &lt;/context-param&gt;
 
      &lt;context-param&gt;
          &lt;param-name&gt;uriFilterPattern&lt;/param-name&gt;
@@ -88,7 +85,7 @@ import au.org.ala.cas.util.PatternMatchingUtils;
  */
 public class UriFilter implements Filter {
 
-    private final static Logger logger = Logger.getLogger(UriFilter.class);
+    private final static Logger logger = LoggerFactory.getLogger(UriFilter.class);
 
     public static final String URI_FILTER_PATTERN = "uriFilterPattern";
     public static final String URI_EXCLUSION_FILTER_PATTERN = "uriExclusionFilterPattern";
@@ -103,7 +100,6 @@ public class UriFilter implements Filter {
     private boolean disabled =false;
 
     public void init(FilterConfig filterConfig) throws ServletException {
-        filterConfig = new AlaFilterConfig(filterConfig);
         //check to see if CAS is enabled.
         String disableCAS = filterConfig.getInitParameter("disableCAS");
         if(disableCAS != null && disableCAS.equals("true")){
@@ -116,9 +112,9 @@ public class UriFilter implements Filter {
             this.contextPath = filterConfig.getServletContext().getInitParameter("contextPath");
             if (this.contextPath == null) {
                 this.contextPath = filterConfig.getServletContext().getContextPath();
-                logger.debug("Using ServletContext contextPath: " + this.contextPath);
+                logger.debug("Using ServletContext contextPath: {}", this.contextPath);
             } else {
-                logger.warn("Overriding ServletContext contextPath: " + filterConfig.getServletContext().getContextPath() + " with ServletContext init-param value: " + this.contextPath);
+                logger.warn("Overriding ServletContext contextPath: {} with ServletContext init-param value: {}", filterConfig.getServletContext().getContextPath(), this.contextPath);
             }
 
             //
@@ -138,7 +134,7 @@ public class UriFilter implements Filter {
             if (excludedUrlPattern == null) {
                 excludedUrlPattern = "";
             }
-            logger.debug("Excluded URI Pattern = '" + excludedUrlPattern + "'");
+            logger.debug("Excluded URI Pattern = '{}'", excludedUrlPattern);
             this.uriExclusionPatterns = PatternMatchingUtils.getPatternList(contextPath, excludedUrlPattern);
     
             //
@@ -148,7 +144,7 @@ public class UriFilter implements Filter {
             if (authOnlyIfLoggedInPattern == null) {
                 authOnlyIfLoggedInPattern = "";
             }
-            logger.debug("Authenticate Only if Logged in Pattern = '" + authOnlyIfLoggedInPattern + "'");
+            logger.debug("Authenticate Only if Logged in Pattern = '{}'", authOnlyIfLoggedInPattern);
             this.authOnlyIfLoggedInPatterns = PatternMatchingUtils.getPatternList(contextPath, authOnlyIfLoggedInPattern);
     
             //
@@ -159,7 +155,7 @@ public class UriFilter implements Filter {
                 Class<?> c = Class.forName(className);
                 filter = (Filter) c.newInstance();
             } catch (Exception e) {
-                logger.error("Could not instantiate a new Filter with class " + className, e);
+                logger.error("Could not instantiate a new Filter with class {}", className, e);
             }
             filter.init(filterConfig);
         }
@@ -173,33 +169,33 @@ public class UriFilter implements Filter {
         if(!disabled){
             String requestUri = ((HttpServletRequest) request).getRequestURI();
             if (filter instanceof AuthenticationFilter) {
-                logger.debug("Request Uri = '" + requestUri + "'");
+                logger.debug("Request Uri = '{}'", requestUri);
             }
 
             if (PatternMatchingUtils.matches(requestUri, uriExclusionPatterns)) {
                 if (filter instanceof AuthenticationFilter) {
-                    logger.debug("Ignoring URI because it matches " + URI_EXCLUSION_FILTER_PATTERN);
+                    logger.debug("Ignoring URI because it matches {}", URI_EXCLUSION_FILTER_PATTERN);
                 } else {
-                    logger.debug("No action taken as matches " + URI_EXCLUSION_FILTER_PATTERN + " for " + requestUri);
+                    logger.debug("No action taken as matches {} for {}", URI_EXCLUSION_FILTER_PATTERN, requestUri);
                 }
                 chain.doFilter(request, response);
             } else if (PatternMatchingUtils.matches(requestUri, uriInclusionPatterns)) {
                 if (filter instanceof AuthenticationFilter) {
-                    logger.debug("Forwarding URI '" + requestUri + "' to CAS authentication filters because it matches " + URI_FILTER_PATTERN);
+                    logger.debug("Forwarding URI '{}' to CAS authentication filters because it matches {}", requestUri, URI_FILTER_PATTERN);
                 } else {
-                    logger.debug("Forwarding URI '" + requestUri + "' to " + filter.getClass().getName() + " filter because it matches " + URI_FILTER_PATTERN);
+                    logger.debug("Forwarding URI '{}' to {} filter because it matches {}", requestUri, filter.getClass().getName(), URI_FILTER_PATTERN);
                 }
                 filter.doFilter(request, response, chain);
             } else if (PatternMatchingUtils.matches(requestUri, authOnlyIfLoggedInPatterns) &&
                         AuthenticationCookieUtils.isUserLoggedIn((HttpServletRequest) request)) {
                 if (filter instanceof AuthenticationFilter) {
-                    logger.debug("Forwarding URI '" + requestUri + "' to CAS authentication filters because it matches " + AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN + " and ALA-Auth cookie exists");
+                    logger.debug("Forwarding URI '{}' to CAS authentication filters because it matches {}  and ALA-Auth cookie exists", requestUri, AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN);
                 } else {
-                    logger.debug("Forwarding URI '" + requestUri + "' to " + filter.getClass().getName() + " filter because it matches " + AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN + " and ALA-Auth cookie exists");
+                    logger.debug("Forwarding URI '{}' to {} filter because it matches {} and ALA-Auth cookie exists", requestUri, filter.getClass().getName(), AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN);
                 }
                 filter.doFilter(request, response, chain);
             } else {
-                logger.debug("No action taken - no matching pattern found for " + requestUri);
+                logger.debug("No action taken - no matching pattern found for {}", requestUri);
                 chain.doFilter(request, response);
             }
         } else{
