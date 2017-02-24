@@ -20,14 +20,7 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +44,8 @@ public class WebServiceAuthenticationHelper {
 	
 	private final String casServer;
 	private final String ticketGrantingTicket;
+
+    final OkHttpClient client = new OkHttpClient();
 	
 	/**
 	 * Constructor that authenticates the user credentials and obtains a CAS Ticket Granting ticket.
@@ -89,26 +84,26 @@ public class WebServiceAuthenticationHelper {
 	 * @return The Ticket Granting Ticket id
 	 */
 	private String getTicketGrantingTicket(final String server, final String username, final String password) {
-		final CloseableHttpClient client = HttpClients.createDefault();
 
-		final HttpPost post = new HttpPost(server + CAS_CONTEXT);
+        FormBody formBody = new FormBody.Builder()
+                .add("username", username)
+                .add("password", password)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(server + CAS_CONTEXT)
+                .post(formBody)
+                .build();
 
 		try {
-            post.setEntity(new UrlEncodedFormEntity(
-                    Arrays.asList(
-                            new BasicNameValuePair("username", username),
-                            new BasicNameValuePair("password", password))
-            ));
-
-            CloseableHttpResponse call = client.execute(post);
+            Call call = client.newCall(request);
 
             final String response;
             final int statusCode;
-            try {
-                response = EntityUtils.toString(call.getEntity());
-                statusCode = call.getStatusLine().getStatusCode();
-            } finally {
-                call.close();
+
+            try (Response httpResponse = call.execute()) {
+                statusCode = httpResponse.code();
+                response = httpResponse.body().string();
             }
 
             switch (statusCode) {
@@ -132,11 +127,7 @@ public class WebServiceAuthenticationHelper {
 		}
 
 		catch (final IOException e) {
-			logger.warn("Exception calling {}", post, e);
-		}
-
-		finally {
-			post.reset();
+			logger.warn("Exception calling {}", request.url(), e);
 		}
 
 		return null;
@@ -154,24 +145,24 @@ public class WebServiceAuthenticationHelper {
 		if (ticketGrantingTicket == null)
 			return null;
 
-        final CloseableHttpClient client = HttpClients.createDefault();
+        FormBody formBody = new FormBody.Builder()
+                .add("service", service)
+                .build();
 
-		final HttpPost post = new HttpPost(server + CAS_CONTEXT + ticketGrantingTicket);
+        Request request = new Request.Builder()
+                .url(server + CAS_CONTEXT + ticketGrantingTicket)
+                .post(formBody)
+                .build();
 
-		try {
-            post.setEntity(new UrlEncodedFormEntity(
-                    Collections.singletonList(new BasicNameValuePair("service", service))
-            ));
+        try {
+            Call call = client.newCall(request);
 
             final String response;
             final int statusCode;
-            CloseableHttpResponse call = client.execute(post);
-            try {
 
-                response = EntityUtils.toString(call.getEntity());
-                statusCode = call.getStatusLine().getStatusCode();
-            } finally {
-                call.close();
+            try (Response httpResponse = call.execute()) {
+                statusCode = httpResponse.code();
+                response = httpResponse.body().string();
             }
 
             switch (statusCode) {
@@ -186,11 +177,7 @@ public class WebServiceAuthenticationHelper {
 		}
 
 		catch (final IOException e) {
-			logger.warn("Exception calling {}", post, e);
-		}
-
-		finally {
-			post.reset();
+			logger.warn("Exception calling {}", request.url(), e);
 		}
 
 		return null;
@@ -204,20 +191,19 @@ public class WebServiceAuthenticationHelper {
 	 * @return Web service response as a string
 	 */
 	private String getServiceResponse(final String url, final String serviceTicket) {
-        final CloseableHttpClient client = HttpClients.createDefault();
+        Request request = new Request.Builder()
+                .url(url + "?ticket=" + serviceTicket)
+                .build();
 
-		final HttpGet get = new HttpGet(url + "?ticket=" + serviceTicket);
-
-		try {
-            CloseableHttpResponse call = client.execute(get);
+        try {
+            Call call = client.newCall(request);
 
             final String response;
             final int statusCode;
-            try {
-                response = EntityUtils.toString(call.getEntity());
-                statusCode = call.getStatusLine().getStatusCode();
-            } finally {
-                call.close();
+
+            try (Response httpResponse = call.execute()) {
+                statusCode = httpResponse.code();
+                response = httpResponse.body().string();
             }
 
             switch (statusCode) {
@@ -232,11 +218,7 @@ public class WebServiceAuthenticationHelper {
 		}
 
 		catch (final IOException e) {
-			logger.warn("Exception calling {}", get, e);
-		}
-
-		finally {
-			get.reset();
+			logger.warn("Exception calling {}", request.url(), e);
 		}
 
 		return null;
