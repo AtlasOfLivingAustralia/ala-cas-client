@@ -22,7 +22,6 @@ public class AuthenticationUtils {
     private static final String ATTR_ROLES = "authority";
 
     /**
-     *
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @return The numeric user id of the currently authenticated user, or null if not authenticated
      */
@@ -31,7 +30,6 @@ public class AuthenticationUtils {
     }
 
     /**
-     *
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @return The email address of the currently authenticated user, or null if not authenticated
      */
@@ -45,7 +43,6 @@ public class AuthenticationUtils {
     }
 
     /**
-     *
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @return The users display name (suitable for display in user interfaces), or null if not authenticated
      */
@@ -63,8 +60,9 @@ public class AuthenticationUtils {
 
     /**
      * Tests to see if the currently authenticated user has the specified role
+     *
      * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
-     * @param role The name of the role to test. E.g. ALA_ADMIN
+     * @param role    The name of the role to test. E.g. ALA_ADMIN
      * @return True if the user has the specified role. False if not, or not authenticated
      */
     public static boolean isUserInRole(final HttpServletRequest request, final String role) {
@@ -89,7 +87,8 @@ public class AuthenticationUtils {
 
     /**
      * Helper method that extracts the value of a specified attribute value from a {@link org.jasig.cas.client.authentication.AttributePrincipal}
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
+     *
+     * @param request      Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter}
      * @param attributeKey The name of the attribute to retrieve
      * @return The value of the specified attribute, or null
      */
@@ -104,11 +103,16 @@ public class AuthenticationUtils {
         if (principal != null && principal instanceof AttributePrincipal) {
             AttributePrincipal attrPrincipal = (AttributePrincipal) principal;
             Object attrValue = attrPrincipal.getAttributes().get(attributeKey);
-            logger.debug(String.format("getPrincipalAttribute(%s) = %s", attributeKey, attrValue ==  null ? "null" : attrValue.toString()));
+            logger.debug(String.format("getPrincipalAttribute(%s) = %s", attributeKey, attrValue == null ? "null" : attrValue.toString()));
             return attrValue == null ? null : attrValue.toString();
         }
 
         return null;
     }
 
+    public static boolean isUserLoggedIn(HttpServletRequest request) {
+        //as described in org.jasig.cas.client.authentication.AuthenticationFilter
+        return request != null && request.getSession(false) != null &&
+                request.getSession(false).getAttribute("_const_cas_assertion_") != null;
+    }
 }

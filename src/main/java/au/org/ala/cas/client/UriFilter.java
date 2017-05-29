@@ -26,6 +26,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import au.org.ala.cas.util.AuthenticationUtils;
 import org.apache.log4j.Logger;
 import org.jasig.cas.client.authentication.AuthenticationFilter;
 
@@ -188,7 +189,8 @@ public class UriFilter implements Filter {
                 }
                 filter.doFilter(request, response, chain);
             } else if (PatternMatchingUtils.matches(requestUri, authOnlyIfLoggedInPatterns) &&
-                        AuthenticationCookieUtils.isUserLoggedIn((HttpServletRequest) request)) {
+                    AuthenticationCookieUtils.isUserLoggedIn((HttpServletRequest) request) &&
+                    canLogin((HttpServletRequest) request)) {
                 if (filter instanceof AuthenticationFilter) {
                     logger.debug("Forwarding URI '" + requestUri + "' to CAS authentication filters because it matches " + AUTHENTICATE_ONLY_IF_LOGGED_IN_FILTER_PATTERN + " and ALA-Auth cookie exists");
                 } else {
@@ -203,6 +205,17 @@ public class UriFilter implements Filter {
             //CAS disabled so send it down the chain to perform the remaining filters
             chain.doFilter(request, response);
         }
+    }
+
+    /**
+     * Returns true if the request is valid for redirection to the login page (requested content type == null),
+     * or if already logged in.
+     *
+     * @param request
+     * @return
+     */
+    private boolean canLogin(HttpServletRequest request) {
+        return AuthenticationUtils.isUserLoggedIn(request) || request.getContentType() == null;
     }
 
     public void destroy() {
