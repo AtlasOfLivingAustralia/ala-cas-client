@@ -16,6 +16,8 @@ package au.org.ala.cas.client;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -111,19 +113,30 @@ public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFil
                 return false;
             }
 
-            String roles = (String) this.principal.getAttributes().get(roleAttribute);
-            
-    		if (roles != null && !roles.equals("")) {
-    			for (String roleValue : roles.split(",")) {
-    				if (rolesEqual(role, roleValue.trim())) {
+            Object value = this.principal.getAttributes().get(roleAttribute);
+
+            if (value instanceof String) {
+                String roles = (String) value;
+                if (roles != null && !roles.equals("")) {
+                    for (String roleValue : roles.split(",")) {
+                        if (rolesEqual(role, roleValue.trim())) {
+                            log.debug("User [" + getRemoteUser() + "] is in role [" + role + "]: " + true);
+                            return true;
+                        }
+                    }
+                } else {
+                    log.debug("No role values in attributes. Returning false.");
+                    return false;
+                }
+            }
+            else if (value instanceof Collection) {
+                for (final Iterator iter = ((Collection) value).iterator(); iter.hasNext();) {
+                    if (rolesEqual(role, iter.next())) {
                         log.debug("User [" + getRemoteUser() + "] is in role [" + role + "]: " + true);
                         return true;
-    				}
-    			}
-    		} else {
-    			log.debug("No role values in attributes. Returning false.");
-    			return false;
-    		}
+                    }
+                }
+            }
 
             return false;
         }
@@ -137,8 +150,8 @@ public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFil
          *
          * @return True if roles are equal, false otherwise.
          */
-        private boolean rolesEqual(final String given, final String candidate) {
-            return ignoreCase ? given.equalsIgnoreCase(candidate) : given.equals(candidate);
+        private boolean rolesEqual(final String given, final Object candidate) {
+            return ignoreCase ? given.equalsIgnoreCase(candidate.toString()) : given.equals(candidate);
         }
     }
 }
