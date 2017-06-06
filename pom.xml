@@ -9,7 +9,7 @@
 
 	<groupId>au.org.ala</groupId>
 	<artifactId>ala-cas-client</artifactId>
-	<version>2.2.0.1</version>
+	<version>2.2.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
 	<name>ala-cas-client</name>
@@ -27,7 +27,7 @@
         <connection>scm:git:git@github.com:AtlasOfLivingAustralia/ala-cas-client.git</connection>
         <url>https://github.com/AtlasOfLivingAustralia/ala-cas-client</url>
         <developerConnection>scm:git:git@github.com:AtlasOfLivingAustralia/ala-cas-client.git</developerConnection>
-        <tag>2.2.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
 	<properties>
