@@ -31,8 +31,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<targetJdk>1.7</targetJdk>
+		<!--<maven.compiler.source>1.7</maven.compiler.source>-->
+		<!--<maven.compiler.target>1.7</maven.compiler.target>-->
 	</properties>
 
 	<dependencies>
@@ -64,7 +65,7 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
-			<version>3.6.0</version>
+			<version>3.10.0</version>
 		</dependency>
 	</dependencies>
 	<build>
