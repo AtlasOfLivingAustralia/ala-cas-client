@@ -4,10 +4,9 @@
 	<parent>
 		<groupId>au.org.ala</groupId>
 		<artifactId>ala-parent-pom</artifactId>
-		<version>1.1</version>
+		<version>8</version>
 	</parent>
 
-	<groupId>au.org.ala</groupId>
 	<artifactId>ala-cas-client</artifactId>
 	<version>2.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -53,7 +52,7 @@
 		<dependency>
 			<groupId>org.jasig.cas.client</groupId>
 			<artifactId>cas-client-core</artifactId>
-			<version>3.4.1</version>
+			<version>3.5.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

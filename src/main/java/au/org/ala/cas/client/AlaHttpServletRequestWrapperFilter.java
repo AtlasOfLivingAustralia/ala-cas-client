@@ -58,6 +58,7 @@ import org.jasig.cas.client.validation.Assertion;
  * @author simon.bear@csiro.au
  *
  */
+@Deprecated
 public class AlaHttpServletRequestWrapperFilter extends AbstractConfigurationFilter {
     /** Name of the attribute used to answer role membership queries */
     private String roleAttribute;
