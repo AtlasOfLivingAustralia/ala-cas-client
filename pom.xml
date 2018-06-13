@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>au.org.ala</groupId>
 		<artifactId>ala-parent-pom</artifactId>
-		<version>8</version>
+		<version>5</version>
 	</parent>
 
 	<artifactId>ala-cas-client</artifactId>
@@ -73,15 +73,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
-				<configuration>
-				</configuration>
-				<dependencies>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
