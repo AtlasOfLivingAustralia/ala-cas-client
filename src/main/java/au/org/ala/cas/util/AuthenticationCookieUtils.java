@@ -9,8 +9,25 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthenticationCookieUtils {
     
     private final static Logger logger = LoggerFactory.getLogger(AuthenticationCookieUtils.class);
-    
-    public static final String ALA_AUTH_COOKIE = "ALA-Auth";
+
+    public static final String DEFAULT_ALA_AUTH_COOKIE_NAME = "ALA-Auth";
+    public static final String ALA_AUTH_COOKIE_NAME_PROPERTY = "ala.auth.cookie.name";
+    public static final String ALA_AUTH_COOKIE_NAME_ENV = "ALA_AUTH_COOKIE_NAME";
+
+    public static final String ALA_AUTH_COOKIE;
+
+    static {
+        ALA_AUTH_COOKIE = firstNotNull(System.getProperty(ALA_AUTH_COOKIE_NAME_PROPERTY), System.getenv(ALA_AUTH_COOKIE_NAME_ENV), DEFAULT_ALA_AUTH_COOKIE_NAME);
+    }
+
+    private static String firstNotNull(String... strings) {
+        for (String string : strings) {
+            if (string != null && !string.trim().equals("")) {
+                return string;
+            }
+        }
+        return "";
+    }
 
     public static boolean isUserLoggedIn(HttpServletRequest request) {
       return cookieExists(request, ALA_AUTH_COOKIE);
@@ -52,9 +69,9 @@ public class AuthenticationCookieUtils {
         }
         
         if (cookie == null) {
-            logger.debug("Cookie {} not found", name);
+            logger.trace("Cookie {} not found", name);
         } else {
-            logger.debug("Cookie {} found", name);
+            logger.trace("Cookie {} found", name);
         }
         
         return cookie;
