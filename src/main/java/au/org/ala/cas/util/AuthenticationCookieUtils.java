@@ -29,10 +29,12 @@ public class AuthenticationCookieUtils {
         return "";
     }
 
+    @Deprecated
     public static boolean isUserLoggedIn(HttpServletRequest request) {
       return cookieExists(request, ALA_AUTH_COOKIE);
     }
-    
+
+    @Deprecated
     public static String getUserName(HttpServletRequest request) {
         return getCookieValue(request, ALA_AUTH_COOKIE);
     }
