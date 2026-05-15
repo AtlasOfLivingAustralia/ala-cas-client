@@ -18,21 +18,21 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
 
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpSession;
 
-import org.jasig.cas.client.authentication.AttributePrincipal;
-import org.jasig.cas.client.configuration.ConfigurationKeys;
-import org.jasig.cas.client.util.AbstractCasFilter;
-import org.jasig.cas.client.util.AbstractConfigurationFilter;
-import org.jasig.cas.client.util.CommonUtils;
-import org.jasig.cas.client.validation.Assertion;
+import org.apereo.cas.client.authentication.AttributePrincipal;
+import org.apereo.cas.client.configuration.ConfigurationKeys;
+import org.apereo.cas.client.util.AbstractCasFilter;
+import org.apereo.cas.client.util.AbstractConfigurationFilter;
+import org.apereo.cas.client.util.CommonUtils;
+import org.apereo.cas.client.validation.Assertion;
 
 /**
  * Implementation of a filter that wraps the normal HttpServletRequest with a
@@ -47,7 +47,7 @@ import org.jasig.cas.client.validation.Assertion;
  * This filter needs to be configured in the chain so that it executes after
  * both the authentication and the validation filters.
  * <p>
- * This code has been shamelessly copied from {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+ * This code has been shamelessly copied from {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
  * since that class is final and cannot be extended.
  * <p>
  * Only the <code>isUserInRole()</code> needed to

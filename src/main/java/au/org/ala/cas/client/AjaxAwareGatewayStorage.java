@@ -1,10 +1,10 @@
 package au.org.ala.cas.client;
 
-import org.jasig.cas.client.authentication.DefaultGatewayResolverImpl;
-import org.jasig.cas.client.authentication.GatewayResolver;
+import org.apereo.cas.client.authentication.DefaultGatewayResolverImpl;
+import org.apereo.cas.client.authentication.GatewayResolver;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * The AjaxAwareGatewayStorage class delegates to a CAS DefaultGatewayResolverImpl with one difference:
