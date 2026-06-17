@@ -1,7 +1,6 @@
 ### ala-cas-client   [![Build Status](https://travis-ci.org/AtlasOfLivingAustralia/ala-cas-client.svg?branch=master)](https://travis-ci.org/AtlasOfLivingAustralia/ala-cas-client)
 
 The latest version is: `4.0.0 - SNAPSHOT`, which uses Java 17.
-NOTES: Grails 7.1.1 is not compatible with Grails 6
 
 If you are using Grails 6 or below, `3.X` is recommended.
 
