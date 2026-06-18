@@ -34,6 +34,19 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>ala-repo-release</id>
+			<name>ALA Internal Releases</name>
+			<url>https://nexus.ala.org.au/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ala-repo-snapshot</id>
+			<name>ALA Internal Snapshots</name>
+			<url>https://nexus.ala.org.au/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
