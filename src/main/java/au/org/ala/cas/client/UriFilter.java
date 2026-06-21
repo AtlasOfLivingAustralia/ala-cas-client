@@ -18,15 +18,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.jasig.cas.client.authentication.AuthenticationFilter;
+import org.apereo.cas.client.authentication.AuthenticationFilter;
 
 import au.org.ala.cas.util.AuthenticationCookieUtils;
 import au.org.ala.cas.util.PatternMatchingUtils;
@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
          &lt;filter-class&gt;au.org.ala.cas.client.UriFilter&lt;/filter-class&gt;
          &lt;init-param&gt;
              &lt;param-name&gt;filterClass&lt;/param-name&gt;
-             &lt;param-value&gt;org.jasig.cas.client.authentication.AuthenticationFilter&lt;/param-value&gt;
+             &lt;param-value&gt;org.apereo.cas.client.authentication.AuthenticationFilter&lt;/param-value&gt;
          &lt;/init-param&gt;
          &lt;init-param&gt;
              &lt;param-name&gt;casServerLoginUrl&lt;/param-name&gt;
@@ -162,7 +162,7 @@ public class UriFilter implements Filter {
     }
 
     /* (non-Javadoc)
-     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+     * @see jakarta.servlet.Filter#doFilter(jakarta.servlet.ServletRequest, jakarta.servlet.ServletResponse, jakarta.servlet.FilterChain)
      */
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {

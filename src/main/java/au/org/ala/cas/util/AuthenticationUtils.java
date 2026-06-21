@@ -1,11 +1,11 @@
 package au.org.ala.cas.util;
 
-import org.jasig.cas.client.authentication.AttributePrincipal;
-import org.jasig.cas.client.util.CommonUtils;
+import org.apereo.cas.client.authentication.AttributePrincipal;
+import org.apereo.cas.client.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +28,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The numeric user id of the currently authenticated user, or null if not authenticated
      */
     public static String getUserId(final HttpServletRequest request) {
@@ -37,7 +37,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The email address of the currently authenticated user, or null if not authenticated
      */
     public static String getEmailAddress(final HttpServletRequest request) {
@@ -51,7 +51,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The users display name (suitable for display in user interfaces), or null if not authenticated
      */
     public static String getDisplayName(final HttpServletRequest request) {
@@ -68,7 +68,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The users first name, or null if not authenticated
      */
     public static String getFirstName(final HttpServletRequest request) {
@@ -78,7 +78,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The users first name, or null if not authenticated
      */
     public static String getLastName(final HttpServletRequest request) {
@@ -88,7 +88,7 @@ public class AuthenticationUtils {
 
     /**
      *
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @return The users roles in a set or an empty set if the user is not authenticated
      */
     public static Set<String> getUserRoles(final HttpServletRequest request) {
@@ -115,7 +115,7 @@ public class AuthenticationUtils {
 
     /**
      * Tests to see if the currently authenticated user has the specified role
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @param role The name of the role to test. E.g. ALA_ADMIN
      * @return True if the user has the specified role. False if not, or not authenticated
      */
@@ -129,8 +129,8 @@ public class AuthenticationUtils {
     }
 
     /**
-     * Helper method that extracts the value of a specified attribute value from a {@link org.jasig.cas.client.authentication.AttributePrincipal}
-     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.jasig.cas.client.util.HttpServletRequestWrapperFilter}
+     * Helper method that extracts the value of a specified attribute value from a {@link org.apereo.cas.client.authentication.AttributePrincipal}
+     * @param request Needs to be a {@link au.org.ala.cas.client.AlaHttpServletRequestWrapperFilter} or {@link org.apereo.cas.client.util.HttpServletRequestWrapperFilter}
      * @param attributeKey The name of the attribute to retrieve
      * @return The value of the specified attribute, or null
      */
